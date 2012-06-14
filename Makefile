@@ -1,11 +1,12 @@
 BASE := hanoi
-LANGS := haskell perl lisp coffee python
+LANGS := haskell perl lisp coffee python c
 EXES := $(addprefix $(BASE)-,$(LANGS))
 SIMS := $(addsuffix -sim,$(LANGS))
 TESTS := $(addsuffix -test,$(LANGS))
 INSTALL := install
 GHC := ghc
 COFFEE := coffee
+CC := cc
 
 .PHONY: all clean test $(SIMS)
 .SECONDARY: $(EXES)
@@ -35,6 +36,9 @@ test: $(TESTS)
 	echo '#!/usr/bin/env node' > $@
 	$(COFFEE) -p $< >> $@
 	chmod +x $@
+
+%-c: %.c
+	$(CC) -o $@ $<
 
 %-haskell: %.hs
 	$(GHC) --make $< -o $@
