@@ -5,7 +5,8 @@ INSTALL := install
 GHC := ghc
 
 .PHONY: all clean
-all: $(EXES)
+.SECONDARY: $(EXES)
+all: $(LANGS)
 clean:
 	-rm $(EXES)
 
@@ -18,3 +19,6 @@ clean:
 %-haskell: %.hs
 	$(GHC) --make $< -o $@
 	rm $*.hi $*.o
+
+%: $(BASE)-%
+	
