@@ -8,7 +8,7 @@ GHC := ghc
 
 .PHONY: all clean test $(SIMS)
 .SECONDARY: $(EXES)
-all: $(LANGS)
+all: $(LANGS) test
 clean:
 	-rm $(EXES)
 test: $(TESTS)
