@@ -12,4 +12,4 @@ sub solve {
     return solve($n-1, $a, $c, $b),"$a -> $c",solve($n-1, $b, $a, $c);
 }
 
-say join "\n", solve $n, 'A'..'C';
+say join "\n", $n, solve $n, 'A'..'C';
