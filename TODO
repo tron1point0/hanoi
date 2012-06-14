@@ -1,0 +1,3 @@
+- Build only the languages that can run on the current machine
+- Tests
+- Simulate solution
