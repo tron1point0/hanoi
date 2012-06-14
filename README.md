@@ -18,3 +18,5 @@ If you want to make only a specific language, run:
 # Running
 
     $ ./hanoi-$LANGUAGE
+
+[wiki]: [http://en.wikipedia.org/wiki/Towers_of_hanoi] (Towers of Hanoi)
