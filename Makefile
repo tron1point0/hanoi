@@ -1,5 +1,5 @@
 BASE := hanoi
-LANGS := haskell perl lisp coffee python c
+LANGS := haskell perl lisp coffee python c js
 EXES := $(addprefix $(BASE)-,$(LANGS))
 SIMS := $(addsuffix -sim,$(LANGS))
 TESTS := $(addsuffix -test,$(LANGS))
@@ -30,6 +30,9 @@ test: $(TESTS)
 	$(INSTALL) -m 744 $< $@
 
 %-lisp: %.lsp
+	$(INSTALL) -m 744 $< $@
+
+%-js: %.js
 	$(INSTALL) -m 744 $< $@
 
 %-coffee: %.coffee
