@@ -26,32 +26,32 @@ test: $(TESTS)
 %-bash: %.sh
 	$(INSTALL) -m 744 $< $@
 
-%-python: %.py
-	$(INSTALL) -m 744 $< $@
-
-%-ruby: %.rb
-	$(INSTALL) -m 744 $< $@
-
-%-perl: %.pl
-	$(INSTALL) -m 744 $< $@
-
-%-lisp: %.lsp
-	$(INSTALL) -m 744 $< $@
-
-%-js: %.js
-	$(INSTALL) -m 744 $< $@
+%-c: %.c
+	$(CC) -o $@ $<
 
 %-coffee: %.coffee
 	echo '#!/usr/bin/env node' > $@
 	$(COFFEE) -p $< >> $@
 	chmod +x $@
 
-%-c: %.c
-	$(CC) -o $@ $<
-
 %-haskell: %.hs
 	$(GHC) --make $< -o $@
 	rm $*.hi $*.o
+
+%-js: %.js
+	$(INSTALL) -m 744 $< $@
+
+%-lisp: %.lsp
+	$(INSTALL) -m 744 $< $@
+
+%-perl: %.pl
+	$(INSTALL) -m 744 $< $@
+
+%-python: %.py
+	$(INSTALL) -m 744 $< $@
+
+%-ruby: %.rb
+	$(INSTALL) -m 744 $< $@
 
 %: $(BASE)-%
 	
