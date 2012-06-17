@@ -1,30 +1,4 @@
-BASE := hanoi
-LANGS := haskell perl lisp coffee python c js ruby bash
-EXES := $(addprefix $(BASE)-,$(LANGS))
-SIMS := $(addsuffix -sim,$(LANGS))
-TESTS := $(addsuffix -test,$(LANGS))
-INSTALL := install
-GHC := ghc
-COFFEE := coffee
-CC := cc
-
-.PHONY: all clean test $(SIMS)
-.SECONDARY: $(EXES)
-all: $(LANGS) test
-clean:
-	-rm $(EXES)
-test: $(TESTS)
-
-%-test: $(BASE)-% t/simulate.pl t/check.pl
-	$(info Testing $<)
-	@./$< | t/simulate.pl | t/check.pl
-
-%-sim: $(BASE)-% t/simulate.pl
-	$(info Simulating $<)
-	@./$< | t/simulate.pl
-
-%-bash: %.sh
-	$(INSTALL) -m 744 $< $@
+SIMPLE := sh js lsp pl py rb
 
 %-c: %.c
 	$(CC) -o $@ $<
@@ -34,24 +8,42 @@ test: $(TESTS)
 	$(COFFEE) -p $< >> $@
 	chmod +x $@
 
-%-haskell: %.hs
+%-hs: %.hs
 	$(GHC) --make $< -o $@
 	rm $*.hi $*.o
 
-%-js: %.js
-	$(INSTALL) -m 744 $< $@
+# End recipes
 
-%-lisp: %.lsp
-	$(INSTALL) -m 744 $< $@
+INSTALL := install
+GHC := ghc
+COFFEE := coffee
+CC := cc
 
-%-perl: %.pl
-	$(INSTALL) -m 744 $< $@
+BASE := $(notdir $(PWD))
+LANGS := $(subst .,,$(suffix $(wildcard $(BASE).*)))
+EXES := $(addprefix $(BASE)-,$(LANGS))
+TESTS := $(wildcard t/*)
 
-%-python: %.py
-	$(INSTALL) -m 744 $< $@
+.PHONY: all clean test
+.SECONDARY: $(EXES) $(addsuffix -test,$(LANGS))
+all: $(LANGS) test ;
+clean: ; -rm $(EXES)
+test: $(addsuffix -test,$(LANGS)) ;
+%-test: $(BASE)-% $(addprefix %-,$(TESTS)) ;
 
-%-ruby: %.rb
-	$(INSTALL) -m 744 $< $@
+define TEST_T
+.SECONDARY: $(addsuffix -$(1),$(LANGS))
+%-$(1): $(BASE)-% $(1)
+	$$(info Running $(1) on $(BASE)-$$*)
+	@./$$< | $(1)
+endef
 
-%: $(BASE)-%
-	
+define SIMPLE_T
+%-$(1): %.$(1)
+	$$(INSTALL) -m 744 $$< $$@
+endef
+
+# Tests that can be -j'd
+$(foreach test,$(TESTS),$(eval $(call TEST_T,$(test))))
+$(foreach lang,$(SIMPLE),$(eval $(call SIMPLE_T,$(lang))))
+%: $(BASE)-% ;
