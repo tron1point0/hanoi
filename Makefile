@@ -12,12 +12,16 @@ SIMPLE := sh js lsp pl py rb
 	$(GHC) --make $< -o $@
 	rm $*.hi $*.o
 
+%-pro: %.pro
+	$(PROLOG) -q -l $< -t "qsave_program('$@',[toplevel(main)])"
+
 # End recipes
 
 INSTALL := install
 GHC := ghc
 COFFEE := coffee
 CC := cc
+PROLOG := swipl
 
 BASE := $(notdir $(PWD))
 LANGS := $(subst .,,$(suffix $(wildcard $(BASE).*)))
