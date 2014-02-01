@@ -1,4 +1,38 @@
+INSTALL := install
+GHC := ghc
+COFFEE := coffee
+CC := cc
+PROLOG := swipl
+JAVAC := javac
+JAVA := java
+JAR := jar
+SED := sed
+
+BASE := $(notdir $(PWD))
+LANGS := $(subst .,,$(suffix $(wildcard $(BASE).*)))
+EXES := $(addprefix $(BASE)-,$(LANGS))
+TESTS := $(wildcard t/*)
+
 SIMPLE := sh js lsp pl py rb
+
+.PHONY: all clean test
+.SECONDARY: $(EXES) $(addsuffix -test,$(LANGS)) $(BASE).jar
+all: $(LANGS) test ;
+clean: ; -rm $(EXES) $(BASE).jar Move.class
+test: $(addsuffix -test,$(LANGS)) ;
+%-test: $(BASE)-% $(addprefix %-,$(TESTS)) ;
+
+define TEST_T
+.SECONDARY: $(addsuffix -$(1),$(LANGS))
+%-$(1): $(BASE)-% $(1)
+	$$(info Running $(1) on $(BASE)-$$*)
+	@./$$< | $(1)
+endef
+
+define SIMPLE_T
+%-$(1): %.$(1)
+	$$(INSTALL) -m 744 $$< $$@
+endef
 
 %-c: %.c
 	$(CC) -o $@ $<
@@ -15,37 +49,22 @@ SIMPLE := sh js lsp pl py rb
 %-pro: %.pro
 	$(PROLOG) -q -l $< -t "qsave_program('$@',[toplevel(main)])"
 
-# End recipes
+%-java: %.jar
+	echo '#!/bin/bash' > $@ && echo '$(JAVA) -jar $<' >> $@
+	chmod +x $@
 
-INSTALL := install
-GHC := ghc
-COFFEE := coffee
-CC := cc
-PROLOG := swipl
+classes = $(BASE).class Move.class
+.INTERMEDIATE: $(classes) $(BASE).mf
 
-BASE := $(notdir $(PWD))
-LANGS := $(subst .,,$(suffix $(wildcard $(BASE).*)))
-EXES := $(addprefix $(BASE)-,$(LANGS))
-TESTS := $(wildcard t/*)
+$(classes): $(BASE).java
+	$(JAVAC) $<
 
-.PHONY: all clean test
-.SECONDARY: $(EXES) $(addsuffix -test,$(LANGS))
-all: $(LANGS) test ;
-clean: ; -rm $(EXES)
-test: $(addsuffix -test,$(LANGS)) ;
-%-test: $(BASE)-% $(addprefix %-,$(TESTS)) ;
+%.jar: $(classes) %.mf %.java
+	$(JAR) cmf $*.mf $@ $(classes) $*.java
 
-define TEST_T
-.SECONDARY: $(addsuffix -$(1),$(LANGS))
-%-$(1): $(BASE)-% $(1)
-	$$(info Running $(1) on $(BASE)-$$*)
-	@./$$< | $(1)
-endef
-
-define SIMPLE_T
-%-$(1): %.$(1)
-	$$(INSTALL) -m 744 $$< $$@
-endef
+%.mf:
+	echo 'Manifest-Version: 1.0' > $@
+	echo 'Main-Class: $*' >> $@
 
 # Tests that can be -j'd
 $(foreach test,$(TESTS),$(eval $(call TEST_T,$(test))))
